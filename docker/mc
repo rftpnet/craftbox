@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+PIPE="${MC_PIPE:-/tmp/minecraft.stdin}"
+
+if [ ! -p "$PIPE" ]; then
+  echo "Minecraft input pipe not found: $PIPE" >&2
+  exit 1
+fi
+
+if [ "$#" -gt 0 ]; then
+  printf "%s\n" "$*" > "$PIPE"
+else
+  cat > "$PIPE"
+fi

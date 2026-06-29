@@ -1,0 +1,68 @@
+#!/bin/sh
+set -u
+
+cd /data
+
+echo "[entrypoint] Starting Minecraft..."
+echo "[entrypoint] Java:"
+java -version
+
+if [ -z "${JAVA_FLAGS:-}" ]; then
+  echo "[entrypoint] ERROR: JAVA_FLAGS is not set" >&2
+  exit 10
+fi
+
+if [ ! -f "$SERVER_JAR" ]; then
+  echo "[entrypoint] ERROR: server jar not found: $SERVER_JAR" >&2
+  echo "[entrypoint] /data contents:" >&2
+  ls -lah /data >&2 || true
+  exit 12
+fi
+
+PIPE="${MC_PIPE:-/tmp/minecraft.stdin}"
+
+rm -f "$PIPE"
+mkfifo "$PIPE"
+
+while :; do sleep 3600; done > "$PIPE" &
+KEEPER_PID="$!"
+
+MC_PID=""
+STOP_SENT=0
+
+stop_minecraft() {
+  if [ "$STOP_SENT" -eq 0 ]; then
+    STOP_SENT=1
+    echo "[entrypoint] Signal received. Sending stop command to Minecraft..." >&2
+
+    if [ -n "$MC_PID" ] && kill -0 "$MC_PID" 2>/dev/null; then
+      printf "stop\n" > "$PIPE" || true
+    fi
+  fi
+}
+
+cleanup() {
+  kill "$KEEPER_PID" 2>/dev/null || true
+  rm -f "$PIPE"
+}
+
+trap stop_minecraft TERM INT
+trap cleanup EXIT
+
+echo "[entrypoint] Command:"
+echo "[entrypoint] java $JAVA_FLAGS -jar $SERVER_JAR $MC_ARGS"
+
+java $JAVA_FLAGS -jar "$SERVER_JAR" $MC_ARGS < "$PIPE" &
+MC_PID="$!"
+
+while :; do
+  wait "$MC_PID"
+  STATUS="$?"
+
+  if kill -0 "$MC_PID" 2>/dev/null; then
+    sleep 1
+  else
+    echo "[entrypoint] Minecraft exited with status $STATUS"
+    exit "$STATUS"
+  fi
+done

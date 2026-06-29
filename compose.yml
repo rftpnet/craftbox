@@ -1,0 +1,20 @@
+services:
+  minecraft:
+    image: ghcr.io/rftpnet/craftbox:java8
+    container_name: minecraft
+    restart: on-failure
+    ports:
+      - "25565:25565/tcp"
+    volumes:
+      - ./data:/data
+    environment:
+      JAVA_FLAGS: >-
+        -Xmx1024M
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=200
+        -XX:+DisableExplicitGC
+        -XX:+PerfDisableSharedMem
+        -XX:MaxMetaspaceSize=128M
+      MC_ARGS: "nogui"
+    stop_signal: SIGTERM
+    stop_grace_period: 5m
