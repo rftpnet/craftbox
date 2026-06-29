@@ -132,6 +132,8 @@ jobs:
     if: needs.base.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           name: bases
@@ -144,6 +146,7 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -eu
           tag="${{ needs.base.outputs.tag }}"
