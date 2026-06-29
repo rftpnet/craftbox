@@ -1,4 +1,4 @@
-# craftbox - A minimal Minecraft Java server container image
+# craftbox - A small Minecraft Java server container image
 
 craftbox is a small container image for running a Minecraft server jar with **Temurin JRE on Alpine**.
 
