@@ -18,12 +18,11 @@ services:
       - ./data:/data
     environment:
       JAVA_FLAGS: >-
-        -Xmx1024M
+        -Xmx2048M
         -XX:+UseG1GC
         -XX:MaxGCPauseMillis=200
         -XX:+DisableExplicitGC
         -XX:+PerfDisableSharedMem
-        -XX:MaxMetaspaceSize=128M
       MC_ARGS: "nogui"
     stop_signal: SIGTERM
     stop_grace_period: 5m
