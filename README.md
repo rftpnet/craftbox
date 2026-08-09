@@ -28,10 +28,12 @@ services:
     stop_grace_period: 5m
 ```
 
-Required:
+**Required:**
 
 - `JAVA_FLAGS`: Java flags for heap and GC tuning.
 - `/data/server.jar`: the Minecraft server jar.
+
+The image runs as UID/GID `1000:1000` by default. Make sure the mounted `/data` directory is writable by that user.
 
 ## Console Commands
 
